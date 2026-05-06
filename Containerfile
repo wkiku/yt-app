@@ -1,6 +1,8 @@
 FROM debian:bookworm-slim
 
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
 
 # パッケージのインストール
 RUN apt-get update && \
@@ -10,6 +12,7 @@ RUN apt-get update && \
     python3-venv \
     apache2 \
     libapache2-mod-wsgi-py3 \
+    nodejs \
     ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
