@@ -1,22 +1,27 @@
-FROM debian:bookworm-slim
-
-ENV DEBIAN_FRONTEND=noninteractive \
-    LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+FROM registry.fedoraproject.org/fedora:latest
 
 # パッケージのインストール
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3 \
+RUN dnf update -y && \
+    dnf install -y \
+    httpd \
+    mod_ssl \
+    mod_wsgi \
+ #    python3 \
     python3-pip \
-    python3-venv \
-    apache2 \
-    libapache2-mod-wsgi-py3 \
+    python3-devel \
+#    python3-wsgi \
     nodejs \
     ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
+    dnf clean all
 
 WORKDIR /app
+
+# WebDAV 用ディレクトリの準備
+# /var/www/webdav (データ本体)
+# /var/lib/dav (ロックファイル管理用)
+RUN mkdir -p /var/www/webdav /var/lib/dav && \
+    chown -R apache:apache /var/www/webdav /var/lib/dav && \
+    chmod 700 /var/lib/dav
 
 # 仮想環境を作成して依存関係をインストール
 RUN python3 -m venv /opt/venv
@@ -29,13 +34,11 @@ RUN pip install --upgrade pip && \
 COPY . .
 
 # Apacheの設定
-COPY apache-site.conf /etc/apache2/sites-available/000-default.conf
-RUN a2enmod wsgi
+COPY apache-site.conf /etc/httpd/conf.d/ytapp.conf
+# SSLディレクトリ準備
+RUN mkdir -p /etc/pki/tls/certs /etc/pki/tls/private
 
-# パーミッション設定
-RUN chown -R www-data:www-data /app
-
-EXPOSE 80
+EXPOSE 443
 
 # Apacheをフォアグラウンドで起動
-CMD ["apachectl", "-D", "FOREGROUND"]
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
