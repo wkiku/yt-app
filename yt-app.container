@@ -1,0 +1,19 @@
+[Unit]
+Description=YouTube Downloader App Container
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=localhost/yt-app:latest
+ContainerName=yt-app
+Hostname=yt-app
+PublishPort=8443:443
+Volume=/etc/pki/tls:/etc/pki/tls:ro
+Volume=/var/www/webdav:/var/www/webdav
+Volume=/etc/httpd/conf/.htpasswd:/etc/httpd/conf/.htpasswd:ro
+Memory=1024M
+RestartPolicy=on-failure:5
+
+[Service]
+Restart=always
+RestartSec=10
