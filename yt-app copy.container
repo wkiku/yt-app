@@ -9,7 +9,7 @@ ContainerName=yt-app
 HostName=yt-app
 PublishPort=8443:443
 Volume=/var/www/webdav:/var/www/webdav
-Volume=%h/.local/share/yt-app/.htpasswd:/etc/httpd/conf/.htpasswd:ro
+Volume=/etc/httpd/conf/.htpasswd:/etc/httpd/conf/.htpasswd:ro
 Memory=1024M
 
 [Service]

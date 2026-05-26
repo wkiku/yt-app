@@ -1,7 +1,7 @@
 [Unit]
 Description=Build YouTube Downloader App Image
-Before=yt-app.container
 
-[Image]
+[Build]
 ImageTag=yt-app:latest
 File=/home/wataru/proj/yt-app/Containerfile
+SetWorkingDirectory=/home/wataru/proj/yt-app

@@ -6,12 +6,10 @@ RUN dnf update -y && \
     httpd \
     mod_ssl \
     mod_wsgi \
- #    python3 \
     python3-pip \
     python3-devel \
-#    python3-wsgi \
-    nodejs \
-    ffmpeg && \
+    ffmpeg \
+    openssl && \
     dnf clean all
 
 WORKDIR /app
@@ -35,8 +33,24 @@ COPY . .
 
 # Apacheの設定
 COPY apache-site.conf /etc/httpd/conf.d/ytapp.conf
-# SSLディレクトリ準備
-RUN mkdir -p /etc/pki/tls/certs /etc/pki/tls/private
+
+# ポート443でのリッスンを有効化
+RUN echo "Listen 443 https" >> /etc/httpd/conf/httpd.conf
+
+# SSL証明書生成（自己署名）
+RUN mkdir -p /etc/pki/tls/certs /etc/pki/tls/private && \
+    openssl req -x509 -nodes -days 365 \
+      -newkey rsa:2048 \
+      -keyout /etc/pki/tls/private/server.key \
+      -out /etc/pki/tls/certs/localhost.crt \
+      -subj "/CN=localhost" && \
+    openssl req -x509 -nodes -days 365 \
+      -key /etc/pki/tls/private/server.key \
+      -out /etc/pki/tls/private/server.crt \
+      -subj "/CN=localhost" && \
+    chmod 644 /etc/pki/tls/certs/*.crt /etc/pki/tls/private/*.crt && \
+    chmod 600 /etc/pki/tls/private/server.key && \
+    rm -f /etc/httpd/conf.d/ssl.conf
 
 EXPOSE 443
 
