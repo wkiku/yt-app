@@ -2,7 +2,8 @@ FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+    LC_ALL=C.UTF-8 \
+    DENO_INSTALL=/usr/local
 
 # パッケージのインストール
 RUN apt-get update && \
@@ -12,11 +13,13 @@ RUN apt-get update && \
     python3-venv \
     apache2 \
     libapache2-mod-wsgi-py3 \
-    nodejs \
+    unzip \
+    curl \
     ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+RUN curl -fsSL https://deno.land/install.sh | sh
 
 # 仮想環境を作成して依存関係をインストール
 RUN python3 -m venv /opt/venv
@@ -30,7 +33,6 @@ COPY . .
 
 # Apacheの設定
 COPY apache-site.conf /etc/apache2/sites-available/000-default.conf
-RUN a2enmod wsgi
 
 # パーミッション設定
 RUN chown -R www-data:www-data /app
